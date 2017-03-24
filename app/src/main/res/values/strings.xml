@@ -3,4 +3,6 @@
     <string name="action_settings">Settings</string>
     <string name="uk">UK \uD83C\uDDEC\uD83C\uDDE7</string>
     <string name="technology">Technology</string>
+    <string name="empty_state_title">Oops, are you off the grid?</string>
+    <string name="empty_state_message">Keep calm, light a fire and pull to refresh to try again.</string>
 </resources>
