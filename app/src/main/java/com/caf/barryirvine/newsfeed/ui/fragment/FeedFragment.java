@@ -8,27 +8,31 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.caf.barryirvine.newsfeed.R;
-import com.caf.barryirvine.newsfeed.api.RssAPIClient;
+import com.caf.barryirvine.newsfeed.api.RssService;
 import com.caf.barryirvine.newsfeed.model.Feed;
 import com.caf.barryirvine.newsfeed.model.FeedItem;
 import com.caf.barryirvine.newsfeed.ui.adapter.FeedAdapter;
 import com.caf.barryirvine.newsfeed.ui.recyclerview.ClickViewHolder;
 import com.caf.barryirvine.newsfeed.web.CustomTabsHelper;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.Collections;
 
-public class FeedFragment extends Fragment implements ClickViewHolder.OnItemClickListener, Callback<Feed>, SwipeRefreshLayout.OnRefreshListener {
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+
+public class FeedFragment extends Fragment implements
+        ClickViewHolder.OnItemClickListener,
+        SwipeRefreshLayout.OnRefreshListener {
 
     private RecyclerView mRecyclerView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
+    private View mEmptyView;
     private FeedAdapter mAdapter;
     private String mPathSegment;
 
@@ -47,9 +51,7 @@ public class FeedFragment extends Fragment implements ClickViewHolder.OnItemClic
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPathSegment = getArguments().getString(Args.FEED_TYPE_PATH_SEGMENT);
-        RssAPIClient.get(getContext(), false)
-                .getItems(mPathSegment)
-                .enqueue(this);
+        getResults(false);
     }
 
     @Override
@@ -71,6 +73,10 @@ public class FeedFragment extends Fragment implements ClickViewHolder.OnItemClic
         if (((GridLayoutManager) mRecyclerView.getLayoutManager()).getSpanCount() > 1) {
             mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.HORIZONTAL));
         }
+        mSwipeRefreshLayout.setRefreshing(true);
+        mAdapter = new FeedAdapter(FeedFragment.this, Collections.<FeedItem>emptyList());
+        mRecyclerView.setAdapter(mAdapter);
+        mEmptyView = view.findViewById(R.id.empty_state_layout);
     }
 
     @Override
@@ -86,24 +92,32 @@ public class FeedFragment extends Fragment implements ClickViewHolder.OnItemClic
     }
 
     @Override
-    public void onResponse(@NonNull final Call<Feed> call, @NonNull final Response<Feed> response) {
-        mSwipeRefreshLayout.setRefreshing(false);
-        if (response.isSuccessful()) {
-            mAdapter = new FeedAdapter(this, response.body().getChannel().getFeedItems());
-            mRecyclerView.setAdapter(mAdapter);
-        }
-    }
-
-    @Override
-    public void onFailure(final Call<Feed> call, final Throwable t) {
-        Log.e(FeedFragment.class.getSimpleName(), "Development error retrieving feed", t);
-    }
-
-    @Override
     public void onRefresh() {
-        RssAPIClient.get(getContext(), true)
+        getResults(true);
+    }
+
+    private void getResults(final boolean forceNetwork) {
+        RssService.get(getContext(), forceNetwork)
                 .getItems(mPathSegment)
-                .enqueue(this);
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        new Consumer<Feed>() {
+                            @Override
+                            public void accept(final Feed feed) throws Exception {
+                                mSwipeRefreshLayout.setRefreshing(false);
+                                mAdapter = new FeedAdapter(FeedFragment.this, feed.getChannel().getFeedItems());
+                                mRecyclerView.setAdapter(mAdapter);
+                                mEmptyView.setVisibility(View.GONE);
+                            }
+                        },
+                        new Consumer<Throwable>() {
+                            @Override
+                            public void accept(final Throwable throwable) throws Exception {
+                                mSwipeRefreshLayout.setRefreshing(false);
+                                mEmptyView.setVisibility(View.VISIBLE);
+                            }
+                        });
     }
 
     private static class Args {

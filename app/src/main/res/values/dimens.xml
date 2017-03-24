@@ -2,5 +2,6 @@
     <dimen name="thumbnail_size">60dp</dimen>
     <dimen name="key_line">16dp</dimen>
     <dimen name="key_line_half">8dp</dimen>
+    <dimen name="empty_state_padding">64dp</dimen>
 
 </resources>
