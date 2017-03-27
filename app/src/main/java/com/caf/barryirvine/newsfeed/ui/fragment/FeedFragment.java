@@ -65,24 +65,16 @@ public class FeedFragment extends Fragment implements
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         mSwipeRefreshLayout.setOnRefreshListener(this);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
-        if (savedInstanceState != null) {
-            mRecyclerView.getLayoutManager().onRestoreInstanceState(savedInstanceState.getParcelable(Args.RECYCLER_VIEW_STATE));
-            //TODO: Restore values of recycler view and set to adapter
+        if (savedInstanceState == null) {
+            mAdapter = new FeedAdapter(FeedFragment.this, Collections.<FeedItem>emptyList());
+            mRecyclerView.setAdapter(mAdapter);
         }
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
         if (((GridLayoutManager) mRecyclerView.getLayoutManager()).getSpanCount() > 1) {
             mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.HORIZONTAL));
         }
         mSwipeRefreshLayout.setRefreshing(true);
-        mAdapter = new FeedAdapter(FeedFragment.this, Collections.<FeedItem>emptyList());
-        mRecyclerView.setAdapter(mAdapter);
         mEmptyView = view.findViewById(R.id.empty_state_layout);
-    }
-
-    @Override
-    public void onSaveInstanceState(final Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putParcelable(Args.RECYCLER_VIEW_STATE, mRecyclerView.getLayoutManager().onSaveInstanceState());
     }
 
     @Override
@@ -122,6 +114,5 @@ public class FeedFragment extends Fragment implements
 
     private static class Args {
         private static final String FEED_TYPE_PATH_SEGMENT = "FEED_TYPE_PATH_SEGMENT";
-        private static final String RECYCLER_VIEW_STATE = "RECYCLER_VIEW_STATE";
     }
 }

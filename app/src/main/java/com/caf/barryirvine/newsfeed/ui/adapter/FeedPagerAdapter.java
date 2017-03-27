@@ -1,6 +1,7 @@
 package com.caf.barryirvine.newsfeed.ui.adapter;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -12,7 +13,7 @@ public class FeedPagerAdapter extends FragmentStatePagerAdapter {
 
     private final Context mContext;
 
-    public FeedPagerAdapter(final Context context, final FragmentManager fm) {
+    public FeedPagerAdapter(@NonNull final Context context, final FragmentManager fm) {
         super(fm);
         mContext = context;
     }
