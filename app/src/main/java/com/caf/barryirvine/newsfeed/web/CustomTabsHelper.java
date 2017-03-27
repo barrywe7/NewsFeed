@@ -25,7 +25,7 @@ import static android.support.customtabs.CustomTabsService.ACTION_CUSTOM_TABS_CO
 /**
  * Helper class for Custom Tabs.
  */
-public class CustomTabsHelper {
+class CustomTabsHelper {
     private static final String TAG = CustomTabsHelper.class.getSimpleName();
     private static final String STABLE_PACKAGE = "com.android.chrome";
     private static final String BETA_PACKAGE = "com.chrome.beta";
@@ -37,7 +37,7 @@ public class CustomTabsHelper {
     private CustomTabsHelper() {
     }
 
-    public static void startUrl(@NonNull final Context context, final String title, final String url) {
+    static void startUrl(@NonNull final Context context, final String title, final String url) {
         if (getPackageNameToUse(context.getPackageManager()) != null) {
             new CustomTabsIntent.Builder()
                     .setToolbarColor(ContextCompat.getColor(context, R.color.colorAccent))
