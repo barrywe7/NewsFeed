@@ -20,7 +20,6 @@ public class WebViewActivity extends AppCompatActivity {
         ActivityCompat.startActivity(activity, makeIntent(activity, title, url), null);
     }
 
-
     protected static Intent makeIntent(@NonNull final Context context, @NonNull final String title, @NonNull final String url) {
         return new Intent(context, WebViewActivity.class)
                 .putExtra(Extras.URL, url)

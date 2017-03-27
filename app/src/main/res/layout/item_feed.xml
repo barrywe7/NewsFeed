@@ -1,45 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@android:color/white"
-    android:foreground="?selectableItemBackground"
-    android:minHeight="?listPreferredItemHeight"
-    android:orientation="horizontal"
-    android:paddingBottom="@dimen/key_line_half"
-    android:paddingEnd="@dimen/key_line"
-    android:paddingStart="@dimen/key_line"
-    android:paddingTop="@dimen/key_line_half">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <ImageView
-        android:id="@+id/thumbnail_image_view"
-        android:layout_width="@dimen/thumbnail_size"
-        android:layout_height="@dimen/thumbnail_size"
-        android:layout_gravity="center_vertical"
-        android:layout_marginEnd="@dimen/key_line"
-        android:background="?android:windowBackground" />
+    <data>
+
+        <variable
+            name="feedItem"
+            type="com.caf.barryirvine.newsfeed.model.FeedItem" />
+    </data>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:background="@android:color/white"
+        android:foreground="?selectableItemBackground"
+        android:minHeight="?listPreferredItemHeight"
+        android:orientation="horizontal"
+        android:paddingBottom="@dimen/key_line_half"
+        android:paddingEnd="@dimen/key_line"
+        android:paddingStart="@dimen/key_line"
+        android:paddingTop="@dimen/key_line_half">
 
-        <TextView
-            android:id="@+id/title_text_view"
+        <ImageView
+            android:id="@+id/thumbnail_image_view"
+            android:layout_width="@dimen/thumbnail_size"
+            android:layout_height="@dimen/thumbnail_size"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="@dimen/key_line"
+            android:background="?android:windowBackground"
+            app:imageUrl="@{feedItem.imageUrl}" />
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/description_text_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+            <TextView
+                android:id="@+id/title_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="@{feedItem.title}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+            <TextView
+                android:id="@+id/description_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="@{feedItem.description}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+        </LinearLayout>
 
     </LinearLayout>
-
-</LinearLayout>
+</layout>
