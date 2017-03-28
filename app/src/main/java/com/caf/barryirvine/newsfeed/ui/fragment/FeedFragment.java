@@ -17,8 +17,6 @@ import com.caf.barryirvine.newsfeed.api.RssService;
 import com.caf.barryirvine.newsfeed.model.Feed;
 import com.caf.barryirvine.newsfeed.model.FeedItem;
 import com.caf.barryirvine.newsfeed.ui.adapter.FeedAdapter;
-import com.caf.barryirvine.newsfeed.ui.recyclerview.ClickViewHolder;
-import com.caf.barryirvine.newsfeed.web.CustomTabsHelper;
 
 import java.util.Collections;
 
@@ -27,7 +25,6 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 public class FeedFragment extends Fragment implements
-        ClickViewHolder.OnItemClickListener,
         SwipeRefreshLayout.OnRefreshListener {
 
     private RecyclerView mRecyclerView;
@@ -66,7 +63,7 @@ public class FeedFragment extends Fragment implements
         mSwipeRefreshLayout.setOnRefreshListener(this);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         if (savedInstanceState == null) {
-            mAdapter = new FeedAdapter(FeedFragment.this, Collections.<FeedItem>emptyList());
+            mAdapter = new FeedAdapter(Collections.<FeedItem>emptyList());
             mRecyclerView.setAdapter(mAdapter);
         }
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
@@ -75,12 +72,6 @@ public class FeedFragment extends Fragment implements
         }
         mSwipeRefreshLayout.setRefreshing(true);
         mEmptyView = view.findViewById(R.id.empty_state_layout);
-    }
-
-    @Override
-    public void onItemClick(@NonNull final View view, final int position) {
-        final FeedItem item = mAdapter.getItem(position);
-        CustomTabsHelper.startUrl(getContext(), item.getTitle(), item.getLink());
     }
 
     @Override
@@ -98,7 +89,7 @@ public class FeedFragment extends Fragment implements
                             @Override
                             public void accept(final Feed feed) throws Exception {
                                 mSwipeRefreshLayout.setRefreshing(false);
-                                mAdapter = new FeedAdapter(FeedFragment.this, feed.getChannel().getFeedItems());
+                                mAdapter = new FeedAdapter(feed.getChannel().getFeedItems());
                                 mRecyclerView.setAdapter(mAdapter);
                                 mEmptyView.setVisibility(View.GONE);
                             }

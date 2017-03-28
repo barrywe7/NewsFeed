@@ -49,39 +49,39 @@ public class FeedItem {
         return mPubDate;
     }
 
-    public static class Builder {
+    static class Builder {
         private String mTitle;
         private Thumbnail mThumbnail;
         private String mDescription;
         private String mLink;
         private String mPubDate;
 
-        public Builder title(final String title) {
+        Builder title(final String title) {
             mTitle = title;
             return this;
         }
 
-        public Builder description(final String description) {
+        Builder description(final String description) {
             mDescription = description;
             return this;
         }
 
-        public Builder thumbnail(final Thumbnail thumbnail) {
+        Builder thumbnail(final Thumbnail thumbnail) {
             mThumbnail = thumbnail;
             return this;
         }
 
-        public Builder link(final String link) {
+        Builder link(final String link) {
             mLink = link;
             return this;
         }
 
-        public Builder pubDate(final String pubDate) {
+        Builder pubDate(final String pubDate) {
             mPubDate = pubDate;
             return this;
         }
 
-        public FeedItem build() {
+        FeedItem build() {
             return new FeedItem(this);
         }
     }

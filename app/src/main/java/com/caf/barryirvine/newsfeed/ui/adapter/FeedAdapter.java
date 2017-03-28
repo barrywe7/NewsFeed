@@ -11,17 +11,15 @@ import android.view.ViewGroup;
 import com.caf.barryirvine.newsfeed.BR;
 import com.caf.barryirvine.newsfeed.R;
 import com.caf.barryirvine.newsfeed.model.FeedItem;
-import com.caf.barryirvine.newsfeed.ui.recyclerview.ClickViewHolder;
+import com.caf.barryirvine.newsfeed.viewmodel.FeedItemViewModel;
 
 import java.util.List;
 
 public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> {
 
-    private final ClickViewHolder.OnItemClickListener mClickListener;
     private final List<FeedItem> mItems;
 
-    public FeedAdapter(final ClickViewHolder.OnItemClickListener clickListener, final List<FeedItem> items) {
-        mClickListener = clickListener;
+    public FeedAdapter(final List<FeedItem> items) {
         mItems = items;
     }
 
@@ -38,7 +36,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-        holder.bind(mItems.get(position));
+        holder.bind(new FeedItemViewModel(holder.itemView.getContext(), mItems.get(position)));
     }
 
     @Override
@@ -46,21 +44,17 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> {
         return mItems.size();
     }
 
-    public FeedItem getItem(final int position) {
-        return mItems.get(position);
-    }
-
-    class ViewHolder extends ClickViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
 
         private final ViewDataBinding mBinding;
 
         ViewHolder(@NonNull final ViewDataBinding binding) {
-            super(binding.getRoot(), mClickListener);
+            super(binding.getRoot());
             mBinding = binding;
         }
 
-        void bind(@NonNull final FeedItem feedItem) {
-            mBinding.setVariable(BR.feedItem, feedItem);
+        void bind(@NonNull final FeedItemViewModel feedItemViewModel) {
+            mBinding.setVariable(BR.viewModel, feedItemViewModel);
             mBinding.executePendingBindings();
         }
     }
