@@ -2,14 +2,20 @@ package com.caf.barryirvine.newsfeed.web;
 
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.customtabs.CustomTabsClient;
 import android.support.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsService;
+import android.support.customtabs.CustomTabsServiceConnection;
+import android.support.customtabs.CustomTabsSession;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
@@ -25,7 +31,7 @@ import static android.support.customtabs.CustomTabsService.ACTION_CUSTOM_TABS_CO
 /**
  * Helper class for Custom Tabs.
  */
-class CustomTabsHelper {
+public class CustomTabsHelper extends CustomTabsServiceConnection {
     private static final String TAG = CustomTabsHelper.class.getSimpleName();
     private static final String STABLE_PACKAGE = "com.android.chrome";
     private static final String BETA_PACKAGE = "com.chrome.beta";
@@ -33,13 +39,19 @@ class CustomTabsHelper {
     private static final String LOCAL_PACKAGE = "com.google.android.apps.chrome";
 
     private static String sPackageNameToUse;
+    private static CustomTabsSession sCustomTabsSession;
+    private final Context mContext;
+    private Uri mMostLikelyUrl;
+    private List<Bundle> mOtherUrls;
+    private CustomTabsClient mClient;
 
-    private CustomTabsHelper() {
+    public CustomTabsHelper(@NonNull final Context context) {
+        mContext = context;
     }
 
     static void startUrl(@NonNull final Context context, final String title, final String url) {
         if (getPackageNameToUse(context.getPackageManager()) != null) {
-            new CustomTabsIntent.Builder()
+            new CustomTabsIntent.Builder(sCustomTabsSession)
                     .setToolbarColor(ContextCompat.getColor(context, R.color.colorAccent))
                     .setShowTitle(true)
                     .addDefaultShareMenuItem()
@@ -51,7 +63,6 @@ class CustomTabsHelper {
             WebViewActivity.start((Activity) context, title, url);
         }
     }
-
 
     /**
      * Goes through all apps that handle VIEW intents and have a warmup service. Picks
@@ -125,5 +136,52 @@ class CustomTabsHelper {
             Log.e(TAG, "Runtime exception while getting specialized handlers");
         }
         return false;
+    }
+
+    public void setUris(@NonNull final List<Uri> uris) {
+        if (uris.size() > 0) {
+            mMostLikelyUrl = uris.remove(0);
+            mOtherUrls = new ArrayList<>();
+            for (final Uri uri : uris) {
+                final Bundle bundle = new Bundle();
+                bundle.putParcelable(CustomTabsService.KEY_URL, uri);
+                mOtherUrls.add(bundle);
+            }
+            if (sCustomTabsSession != null) {
+                setPossibleUrls();
+            }
+        }
+    }
+
+    @Override
+    public void onCustomTabsServiceConnected(final ComponentName name, final CustomTabsClient client) {
+        mClient = client;
+        if (client != null) {
+            client.warmup(0L);
+            if (sCustomTabsSession == null) {
+                sCustomTabsSession = mClient.newSession(null);
+            }
+        }
+        setPossibleUrls();
+    }
+
+    public void bindCustomTabService() {
+        CustomTabsClient.bindCustomTabsService(mContext, getPackageNameToUse(mContext.getPackageManager()), this);
+    }
+
+    public void unbindCustomTabService() {
+        mContext.unbindService(this);
+    }
+
+    @Override
+    public void onServiceDisconnected(final ComponentName name) {
+        mClient = null;
+        sCustomTabsSession = null;
+    }
+
+    private void setPossibleUrls() {
+        if (sCustomTabsSession != null && mMostLikelyUrl != null) {
+            sCustomTabsSession.mayLaunchUrl(mMostLikelyUrl, null, mOtherUrls);
+        }
     }
 }

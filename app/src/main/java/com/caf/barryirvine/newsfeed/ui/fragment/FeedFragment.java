@@ -17,6 +17,7 @@ import com.caf.barryirvine.newsfeed.api.RssService;
 import com.caf.barryirvine.newsfeed.model.Feed;
 import com.caf.barryirvine.newsfeed.model.FeedItem;
 import com.caf.barryirvine.newsfeed.ui.adapter.FeedAdapter;
+import com.caf.barryirvine.newsfeed.web.CustomTabsHelper;
 
 import java.util.Collections;
 
@@ -32,6 +33,7 @@ public class FeedFragment extends Fragment implements
     private View mEmptyView;
     private FeedAdapter mAdapter;
     private String mPathSegment;
+    private CustomTabsHelper mCustomTabsHelper;
 
     public FeedFragment() {
     }
@@ -48,7 +50,20 @@ public class FeedFragment extends Fragment implements
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPathSegment = getArguments().getString(Args.FEED_TYPE_PATH_SEGMENT);
+        mCustomTabsHelper = new CustomTabsHelper(getContext());
         getResults(false);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mCustomTabsHelper.bindCustomTabService();
+    }
+
+    @Override
+    public void onStop() {
+        mCustomTabsHelper.unbindCustomTabService();
+        super.onStop();
     }
 
     @Override
@@ -90,6 +105,7 @@ public class FeedFragment extends Fragment implements
                             public void accept(final Feed feed) throws Exception {
                                 mSwipeRefreshLayout.setRefreshing(false);
                                 mAdapter = new FeedAdapter(feed.getChannel().getFeedItems());
+                                mCustomTabsHelper.setUris(feed.getChannel().getUrls());
                                 mRecyclerView.setAdapter(mAdapter);
                                 mEmptyView.setVisibility(View.GONE);
                             }
